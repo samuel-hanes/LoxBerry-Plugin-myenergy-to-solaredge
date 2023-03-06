@@ -1,0 +1,7 @@
+#/bin/sh
+
+apt -y purge python3-pandas 
+apt -y autoremove
+
+# Exit with Status 0
+exit 0
