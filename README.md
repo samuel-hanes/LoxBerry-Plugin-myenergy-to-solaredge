@@ -88,7 +88,7 @@ Distributed under the Apache License 2.0. See `LICENSE` for more information.
 <!-- CONTACT -->
 ## Contact
 
-Christoph Moar - [@christophmoar](https://twitter.com/christophmoar) - loxberry.myenergi.plugin@gmail.com
+Christoph Moar - [@christophmoar](https://twitter.com/christophmoar) 
 
 Project Link: [https://github.com/christophmoar/LoxBerry-Plugin-myenergi](https://github.com/christophmoar/LoxBerry-Plugin-myenergi)
 
