@@ -57,9 +57,10 @@ echo "<INFO> Plugin CONFIG folder is: $PCONFIG"
 echo "<INFO> Plugin SBIN folder is: $PSBIN"
 echo "<INFO> Plugin BIN folder is: $PBIN"
 
-echo "<INFO> installing latest version of \"pymyenergi\" for python3..."
+echo "<INFO> installing latest version of \"pymyenergi\" and \"influxdb-client[ciso]\"for python3..."
 pip3 install --user --upgrade pip
 pip3 install --user --upgrade pymyenergi
+pip3 install --user --upgrade influxdb-client[ciso]
 
 # Exit with Status 0
 exit 0
