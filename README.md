@@ -26,11 +26,24 @@ The plugin is basically a clone and adaption of  the [LoxBerry-Plugin-solaredge]
 The installation should be straight forward via web interface of the loxberry.
 
 ### Configuration options
-The only settings are:
+The only settings are the following. If the influxdb values are not configured, the push to influxdb operation will be skipped.
 
-* API Key
-* Serial
-* Miniserver UDP Port
+```
+[MYENERGI]
+API_KEY = {api key for myenergi account}
+SERIAL = {serial for myenergi account}
+
+[MINISERVER]
+PORT = {udp port to push data to miniserver}
+
+[INFLUXDB]
+DATABASE = {database name}
+MEASUREMENT = {measurement name}
+SERVER = {server name or ip}
+PORT = {influxdb port}
+USERNAME = {influxdb basicauth username}
+PASSWORD = {influxdb basicauth password}
+```
 
 ## Data sent via JSON to miniserver
 The following is an example of a json struct sent to the miniserver, containing the following data:
