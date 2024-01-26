@@ -38,9 +38,12 @@ def send_udp(MINISERVER_IP, UDP_PORT, MESSAGE):
 #"eexp": energy exported kwh ,
 #"egen": energy generated kwh ,
 #"egrn": energy green kwh 
+"""dd
 
+dddd
+d
 def send_influxdb(dictionary,in_database,in_measurement, in_server, in_port, in_user, in_pwd):
-    """Send data to influxdb"""
+    #Send data to influxdb
     if in_database != "" and in_server != "" and in_measurement != "" and in_port != "":
         try:
             in_url = "http://"+in_user+":"+in_pwd+"@"+in_server+":"+in_port;
@@ -57,24 +60,26 @@ def send_influxdb(dictionary,in_database,in_measurement, in_server, in_port, in_
         except Exception as ex:
             logging.error("<ERROR> Failed to send message to influxdb!")
             logging.error("<DEBUG> Exception: ", ex)
+"""
 
 async def main():
     """loxberry plugin for myenergi API sends every 1 minutes the actual
     power production and power consumtion values to the miniserver"""
     # create file strings from os environment variables
-    lbplog = os.environ['LBPLOG'] + "/myenergi/myenergi.log"
-    lbpconfig = os.environ['LBPCONFIG'] + "/myenergi/plugin.cfg"
-    lbsconfig = os.environ['LBSCONFIG'] + "/general.cfg"
+
+    lbplog = os.environ['LBPLOG'] + "/solaredge/solaredge.log"
+    lbpconfig = os.environ['LBPCONFIG'] + "/solaredge/plugin.cfg"
+    lbsconfig = os.environ['LBSCONFIG'] + "/general.cfg
 
     # creating log file and set log format
     logging.basicConfig(filename=lbplog,level=logging.INFO,format='%(asctime)s: %(message)s ')
     #logging.info("<INFO> initialise logging...")
     # open config file and read options
-    try:
-        from pymyenergi.connection import Connection
-        from pymyenergi.client import MyenergiClient
+  
+     try:
+        from solaredge_interface.api.SolarEdgeAPI import SolarEdgeAPI
     except:
-        logging.error("<ERROR> Error loading pymyenergi python api module... exit script")
+        logging.error("<ERROR> Error loading SolarEdgeAPI module... exit script")
         return
     try:
         cfg = ConfigParser()
@@ -83,10 +88,16 @@ async def main():
         global_cfg.read(lbsconfig)
     except:
         logging.error("<ERROR> Error parsing config files...")
-
+        
     #define variables with values from config files
-    apiKey = cfg.get("MYENERGI", "API_KEY")
-    serial = cfg.get("MYENERGI", "SERIAL")
+    #apiKey = cfg.get("MYENERGI", "API_KEY")
+    #serial = cfg.get("MYENERGI", "SERIAL")
+    # comment for local debugging
+    #miniserver = global_cfg.get("MINISERVER1", "IPADDRESS")
+    #udp_port = int(cfg.get("MINISERVER", "PORT"))
+    
+    apiKey = cfg.get("SOLAREDGE", "API_KEY")
+    location = cfg.get("SOLAREDGE", "LOCATION")
     # comment for local debugging
     miniserver = global_cfg.get("MINISERVER1", "IPADDRESS")
     udp_port = int(cfg.get("MINISERVER", "PORT"))
@@ -94,28 +105,34 @@ async def main():
     #miniserver = "127.0.0.1" 
     #udp_port = 15555
     
-    in_database = cfg.get('INFLUXDB','DATABASE')
-    in_measurement = cfg.get('INFLUXDB','MEASUREMENT')
-    in_server = cfg.get('INFLUXDB','SERVER')
-    in_port = cfg.get('INFLUXDB','PORT')
-    in_user = cfg.get('INFLUXDB','USERNAME')
-    in_pwd = cfg.get('INFLUXDB','PASSWORD')    
+    #in_database = cfg.get('INFLUXDB','DATABASE')
+    #in_measurement = cfg.get('INFLUXDB','MEASUREMENT')
+    #in_server = cfg.get('INFLUXDB','SERVER')
+    #in_port = cfg.get('INFLUXDB','PORT')
+    #in_user = cfg.get('INFLUXDB','USERNAME')
+    #in_pwd = cfg.get('INFLUXDB','PASSWORD')    
 
     # get the data as dictionary and as json
+ 
     try:
-        dictionary = await get_data(serial, apiKey)
-        msg = json.dumps(dictionary, indent = 2 , separators = (" , ", ": "))
-        logging.info("<INFO> Value: %s" % msg)
+        api = SolarEdgeAPI(api_key=apiKey, datetime_response=True, pandas_response=False)
+        response = api.get_site_current_power_flow(location)
+        y = json.loads(response.text)
+        curPwr = y['siteCurrentPowerFlow']['PV']['currentPower']
+        consPwr = y['siteCurrentPowerFlow']['LOAD']['currentPower']
+        actPwr = float(consPwr) - float(curPwr)
+        unit = y['siteCurrentPowerFlow']['unit']
+        msg = str(actPwr.__round__(2))
     except:
         logging.error("<ERROR> Failed to execute API call...")
         msg = None
 
     # send the data to influxdb
-    if dictionary != None:
-        send_influxdb(dictionary,in_database,in_measurement, in_server, in_port, in_user, in_pwd)
-        logging.info("<INFO> Data sent to Influxdb IP: %s" % in_server)
-    else:
-        logging.error("<ERROR> Nothing sent to Influxdb IP: %s" % in_server)
+    #if dictionary != None:
+     #   send_influxdb(dictionary,in_database,in_measurement, in_server, in_port, in_user, in_pwd)
+      #  logging.info("<INFO> Data sent to Influxdb IP: %s" % in_server)
+    #else:
+     #   logging.error("<ERROR> Nothing sent to Influxdb IP: %s" % in_server)
         
     # send the data to miniserver
     if msg != None:
@@ -124,7 +141,7 @@ async def main():
     else:
         logging.error("<ERROR> Nothing sent to Miniserver IP: %s" % miniserver)
 
-
+"""
 async def get_data(user, password) -> None:
     from datetime import datetime
     from pymyenergi.connection import Connection
@@ -175,7 +192,7 @@ async def get_data(user, password) -> None:
         }
     return response
 
-
+"""
 if __name__ == "__main__":
     loop = asyncio.get_event_loop()
     loop.run_until_complete(main())
